@@ -23,3 +23,9 @@ dev-deps:
 
 clean:
 	go clean
+	rm -f gpb-firewalls-microservice
+
+dist-clean:
+	rm -rf pkg src bin
+
+ci-deps:
