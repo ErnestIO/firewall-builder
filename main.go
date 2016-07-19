@@ -4,28 +4,32 @@
 
 package main
 
-import "runtime"
+import (
+	"os"
+	"runtime"
 
-var index = 0
+	l "github.com/ernestio/builder-library"
+)
+
+var s l.Scheduler
 
 func main() {
-	n := natsClient()
-	r := redisClient()
+	s.Setup(os.Getenv("NATS_URI"))
 
 	// Process requests
-	processRequest(n, r, "firewalls.create", "firewall.create")
-	processRequest(n, r, "firewalls.update", "firewall.update")
-	processRequest(n, r, "firewalls.delete", "firewall.delete")
+	s.ProcessRequest("firewalls.create", "firewall.create")
+	s.ProcessRequest("firewalls.delete", "firewall.delete")
+	s.ProcessRequest("firewalls.update", "firewall.update")
 
 	// Process resulting success
-	processResponse(n, r, "firewall.create.done", "firewalls.create.", "firewall.create", "completed")
-	processResponse(n, r, "firewall.update.done", "firewalls.update.", "firewall.update", "completed")
-	processResponse(n, r, "firewall.delete.done", "firewalls.delete.", "firewall.delete", "completed")
+	s.ProcessSuccessResponse("firewall.create.done", "firewall.create", "firewalls.create.done")
+	s.ProcessSuccessResponse("firewall.delete.done", "firewall.delete", "firewalls.delete.done")
+	s.ProcessSuccessResponse("firewall.update.done", "firewall.update", "firewalls.update.done")
 
 	// Process resulting errors
-	processResponse(n, r, "firewall.create.error", "firewalls.create.", "firewall.create", "errored")
-	processResponse(n, r, "firewall.update.error", "firewalls.create.", "firewall.update", "errored")
-	processResponse(n, r, "firewall.delete.error", "firewalls.delete.", "firewall.delete", "errored")
+	s.ProcessFailedResponse("firewall.create.error", "firewalls.create.error")
+	s.ProcessFailedResponse("firewall.delete.error", "firewalls.delete.error")
+	s.ProcessFailedResponse("firewall.update.error", "firewalls.update.error")
 
 	runtime.Goexit()
 }
