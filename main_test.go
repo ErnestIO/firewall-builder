@@ -15,7 +15,12 @@ import (
 	"time"
 
 	"github.com/nats-io/nats"
+	"gopkg.in/redis.v3"
 )
+
+var setup = false
+var n *nats.Conn
+var r *redis.Client
 
 func wait(ch chan bool) error {
 	return waitTime(ch, 500*time.Millisecond)
@@ -30,13 +35,21 @@ func waitTime(ch chan bool, timeout time.Duration) error {
 	return errors.New("timeout")
 }
 
+func testSetup() {
+	if setup == false {
+		os.Setenv("NATS_URI", "nats://localhost:4222")
+
+		n = natsClient()
+		n.Subscribe("config.get.redis", func(msg *nats.Msg) {
+			n.Publish(msg.Reply, []byte(`{"DB":0,"addr":"localhost:6379","password":""}`))
+		})
+		r = redisClient()
+		setup = true
+	}
+}
+
 func TestProvisionAllFirewallsBasic(t *testing.T) {
-	os.Setenv("NATS_URI", "nats://localhost:4222")
-	os.Setenv("REDIS_ADDR", "localhost:6379")
-
-	n := natsClient()
-	r := redisClient()
-
+	testSetup()
 	processRequest(n, r, "firewalls.create", "firewall.provision")
 
 	ch := make(chan bool)
@@ -73,12 +86,7 @@ func TestProvisionAllFirewallsBasic(t *testing.T) {
 }
 
 func TestProvisionAllFirewallsWithNetworks(t *testing.T) {
-	os.Setenv("NATS_URI", "nats://localhost:4222")
-	os.Setenv("REDIS_ADDR", "localhost:6379")
-
-	n := natsClient()
-	r := redisClient()
-
+	testSetup()
 	processRequest(n, r, "firewalls.create", "firewall.provision")
 
 	ch := make(chan bool)
@@ -108,12 +116,7 @@ func TestProvisionAllFirewallsWithNetworks(t *testing.T) {
 }
 
 func ignoreTestProvisionAllFirewallsSendingTwoFirewalls(t *testing.T) {
-	os.Setenv("NATS_URI", "nats://localhost:4222")
-	os.Setenv("REDIS_ADDR", "localhost:6379")
-
-	n := natsClient()
-	r := redisClient()
-
+	testSetup()
 	processRequest(n, r, "firewalls.create", "firewall.provision")
 
 	ch := make(chan bool)
@@ -149,12 +152,7 @@ func ignoreTestProvisionAllFirewallsSendingTwoFirewalls(t *testing.T) {
 }
 
 func TestProvisionAllFirewallsWithInvalidMessage(t *testing.T) {
-	os.Setenv("NATS_URI", "nats://localhost:4222")
-	os.Setenv("REDIS_ADDR", "localhost:6379")
-
-	n := natsClient()
-	r := redisClient()
-
+	testSetup()
 	processRequest(n, r, "firewalls.create", "firewall.provision")
 
 	ch := make(chan bool)
@@ -180,12 +178,7 @@ func TestProvisionAllFirewallsWithInvalidMessage(t *testing.T) {
 }
 
 func TestProvisionAllFirewallsWithDifferentMessageType(t *testing.T) {
-	os.Setenv("NATS_URI", "nats://localhost:4222")
-	os.Setenv("REDIS_ADDR", "localhost:6379")
-
-	n := natsClient()
-	r := redisClient()
-
+	testSetup()
 	processRequest(n, r, "firewalls.create", "firewall.provision")
 
 	ch := make(chan bool)
@@ -203,12 +196,7 @@ func TestProvisionAllFirewallsWithDifferentMessageType(t *testing.T) {
 }
 
 func TestFirewallCreatedForAMultiRequest(t *testing.T) {
-	os.Setenv("NATS_URI", "nats://localhost:4222")
-	os.Setenv("REDIS_ADDR", "localhost:6379")
-
-	n := natsClient()
-	r := redisClient()
-
+	testSetup()
 	processResponse(n, r, "firewall.create.done", "firewalls.create.", "firewall.provision", "completed")
 
 	ch := make(chan bool)
@@ -232,12 +220,7 @@ func TestFirewallCreatedForAMultiRequest(t *testing.T) {
 }
 
 func TestFirewallCreated(t *testing.T) {
-	os.Setenv("NATS_URI", "nats://localhost:4222")
-	os.Setenv("REDIS_ADDR", "localhost:6379")
-
-	n := natsClient()
-	r := redisClient()
-
+	testSetup()
 	processResponse(n, r, "firewall.create.done", "firewalls.create.", "firewall.provision", "completed")
 
 	ch := make(chan bool)
@@ -267,12 +250,7 @@ func TestFirewallCreated(t *testing.T) {
 }
 
 func TestProvisionFirewallError(t *testing.T) {
-	os.Setenv("NATS_URI", "nats://localhost:4222")
-	os.Setenv("REDIS_ADDR", "localhost:6379")
-
-	n := natsClient()
-	r := redisClient()
-
+	testSetup()
 	processResponse(n, r, "firewall.create.error", "firewalls.create.", "firewall.provision", "errored")
 
 	ch := make(chan bool)
