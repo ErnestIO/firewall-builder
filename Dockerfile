@@ -7,4 +7,4 @@ WORKDIR /go/src/github.com/ernestio/firewall-builder
 
 RUN make deps && go install
 
-ENTRYPOINT /go/bin/firewall-builder
+ENTRYPOINT ./entrypoint.sh
