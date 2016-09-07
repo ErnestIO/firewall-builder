@@ -6,8 +6,8 @@ Once all of them are fully processed it will emit back a message 'firewalls.crea
 
 ## Build status
 
-* master:  [![CircleCI](https://circleci.com/gh/ErnestIO/firewall-builder/tree/master.svg?style=svg)](https://circleci.com/gh/ErnestIO/firewall-builder/tree/master)
-* develop: [![CircleCI](https://circleci.com/gh/ErnestIO/firewall-builder/tree/develop.svg?style=svg)](https://circleci.com/gh/ErnestIO/firewall-builder/tree/develop)
+* master:  [![CircleCI](https://circleci.com/gh/ernestio/firewall-builder/tree/master.svg?style=svg)](https://circleci.com/gh/ernestio/firewall-builder/tree/master)
+* develop: [![CircleCI](https://circleci.com/gh/ernestio/firewall-builder/tree/develop.svg?style=svg)](https://circleci.com/gh/ernestio/firewall-builder/tree/develop)
 
 ## Installation
 
